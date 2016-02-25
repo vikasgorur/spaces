@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -27,7 +28,17 @@ func showSpaces(f *os.File) {
 }
 
 func main() {
-	files := os.Args[1:]
+	var help = flag.Bool("h", false, "show usage")
+
+	flag.Parse()
+	if *help {
+		fmt.Println("Usage:")
+		fmt.Println("    showspace [file1 ...]")
+		fmt.Println("    cat <file> | showspace")
+		os.Exit(1)
+	}
+
+	files := flag.Args()
 	if len(files) == 0 {
 		showSpaces(os.Stdin)
 	} else {
