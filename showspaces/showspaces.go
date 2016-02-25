@@ -13,13 +13,13 @@ import (
 
 var redHighlight = color.New(color.BgRed).SprintfFunc()
 
-// separate the string and its trailing spaces and return them
+// Separate the string and its trailing spaces and return them
 func trimTrailing(s string) (string, string) {
 	nonspace := strings.TrimRightFunc(s, unicode.IsSpace)
 	return nonspace, s[len(nonspace):len(s)]
 }
 
-// highlight trailing spaces in the file
+// Highlight trailing spaces in the file
 func showSpaces(f *os.File) {
 	input := bufio.NewScanner(f)
 
@@ -29,7 +29,7 @@ func showSpaces(f *os.File) {
 	}
 }
 
-// exit nonzero if any line in the file has trailing spaces
+// Exit nonzero if any line in the file has trailing spaces
 func hasSpaces(f *os.File) {
 	input := bufio.NewScanner(f)
 
@@ -60,7 +60,7 @@ func main() {
 		for _, arg := range files {
 			f, err := os.Open(arg)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "showspace: %v\n", err)
+				fmt.Fprintf(os.Stderr, "showspaces: %v\n", err)
 				continue
 			}
 
