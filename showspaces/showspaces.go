@@ -42,14 +42,9 @@ func hasSpaces(f *os.File) {
 }
 
 func main() {
-	var help = flag.Bool("h", false, "show usage")
 	var check = flag.Bool("c", false, "check mode; exit 0 if there are no trailing spaces, nonzero otherwise")
 
 	flag.Parse()
-	if *help {
-		flag.Usage()
-		os.Exit(1)
-	}
 
 	var process func(*os.File)
 	if *check {
