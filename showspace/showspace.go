@@ -29,7 +29,7 @@ func showSpaces(f *os.File) {
 	}
 }
 
-// return true if any line in the file has trailing spaces
+// exit nonzero if any line in the file has trailing spaces
 func hasSpaces(f *os.File) {
 	input := bufio.NewScanner(f)
 
@@ -51,17 +51,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	var mode func(*os.File)
-
+	var process func(*os.File)
 	if *check {
-		mode = hasSpaces
+		process = hasSpaces
 	} else {
-		mode = showSpaces
+		process = showSpaces
 	}
 
 	files := flag.Args()
 	if len(files) == 0 {
-		mode(os.Stdin)
+		process(os.Stdin)
 	} else {
 		for _, arg := range files {
 			f, err := os.Open(arg)
@@ -70,7 +69,7 @@ func main() {
 				continue
 			}
 
-			mode(f)
+			process(f)
 			f.Close()
 		}
 	}
