@@ -2,66 +2,90 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode"
+
+	"gopkg.in/fatih/set.v0"
 )
 
-func trimSpaces(f *os.File) {
-	input := bufio.NewScanner(f)
+// trimSpaces reads lines from `in` and writes them to `out` with
+// trailing spaces removed
+func trimSpaces(in io.Reader, out io.Writer) {
+	lines := bufio.NewScanner(in)
 
-	for input.Scan() {
-		nonspace := strings.TrimRightFunc(input.Text(), unicode.IsSpace)
-		fmt.Println(nonspace)
+	for lines.Scan() {
+		nonspace := strings.TrimRightFunc(lines.Text(), unicode.IsSpace)
+		out.Write([]byte(nonspace + "\n"))
 	}
 }
 
-// FileList is a list of filenames.
-type FileList interface {
-	// Next() returns a filename, and the second value is true when there
-	// are no more files left.
-	Next() (string, bool)
-}
+var srcExtensions set.Interface = set.New(
+	"html",
+	"go",
+)
 
-// Args is a FileList that gets its names from a given slice.
-type Args struct {
-	args []string
-	i    int
-}
-
-// NewArgs returns a new Args
-func NewArgs(args []string) *Args {
-	return &Args{args, 0}
-}
-
-// Next returns the next argument
-func (a *Args) Next() (string, bool) {
-	if a.i == len(a.args) {
-		return "", true
+// isSourceFile returns true if the path is a source file
+func isSourceFile(path string, info os.FileInfo) bool {
+	ext := filepath.Ext(path)
+	if info.Mode().IsRegular() && strings.HasPrefix(ext, ".") && srcExtensions.Has(filepath.Ext(path)[1:]) {
+		return true
 	}
 
-	name := a.args[a.i]
-	a.i++
-	return name, false
+	return false
+}
+
+// transformFile reads a single file, fixes trailing spaces, and writes it back.
+func transformFile(path string, info os.FileInfo, err error) error {
+	if isSourceFile(path, info) {
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+
+		out, err := ioutil.TempFile(".", "ts")
+		if err != nil {
+			return err
+		}
+
+		outPath := out.Name()
+		trimSpaces(f, out)
+
+		if err := f.Close(); err != nil {
+			return err
+		}
+		if err := out.Close(); err != nil {
+			return err
+		}
+
+		if err := os.Rename(outPath, path); err != nil {
+			os.Remove(outPath)
+			return err
+		}
+	}
+	return nil
+}
+
+func walkDir() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "trimspaces: could not get current directory: %v\n", err)
+		os.Exit(2)
+	}
+
+	filepath.Walk(cwd, transformFile)
 }
 
 func main() {
-	if len(os.Args[1:]) == 0 {
-		trimSpaces(os.Stdin)
-	} else {
-		files := NewArgs(os.Args[1:])
-		arg, end := files.Next()
-		for !end {
-			f, err := os.Open(arg)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "trimspaces: %v\n", err)
-				continue
-			}
+	var dir = flag.Bool("dir", true, "operate recursively on all source files in the current directory")
+	//var changes = flag.Bool("changes", false, "operate only on files that have been changed")
 
-			trimSpaces(f)
-			f.Close()
-			arg, end = files.Next()
-		}
+	if *dir {
+		walkDir()
 	}
 }
