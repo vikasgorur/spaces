@@ -1,2 +1,27 @@
-# trimspace
-A tool to remove trailing whitespace recursively from files in a directory
+# trimspaces
+A tool to remove trailing whitespaces recursively from source files in a directory.
+
+## Usage
+
+The tool operates in two modes: all source files in the directory, or just those files that
+have been changed (only works inside git repositories).
+
+To fix all files under the current directory:
+
+```bash
+$ trimspaces -dir
+```
+
+To fix only changed files:
+
+```bash
+$ trimspaces -changed
+```
+
+## Why bother?
+
+Trailing whitespaces are an annoyance. They can make pull requests and code reviews confusing
+because a whitespace change causes a line to be a part of the diff even though nothing else
+has changed. Most developers and open source projects prefer that they are removed.
+
+For more, read [Why Are Trailing Whitespaces Bad?](http://www.dinduks.com/why-are-trailing-whitespaces-bad/)

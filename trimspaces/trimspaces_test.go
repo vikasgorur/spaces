@@ -7,7 +7,7 @@ func TestExtractPath(t *testing.T) {
 		input  string
 		output string
 	}{
-		{"M test.go", "test.go"},
+		{" M test.go", "test.go"},
 		{"?? index.html", "index.html"},
 		{"RM index.html -> index.htmls", ""},
 	}

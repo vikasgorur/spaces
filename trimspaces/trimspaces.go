@@ -168,6 +168,10 @@ func transformFile(path string, info os.FileInfo, err error) error {
 			os.Remove(outPath)
 			return err
 		}
+
+		if *verbose {
+			fmt.Fprintf(os.Stderr, "✓ %v\n", path)
+		}
 	}
 	return nil
 }
@@ -187,7 +191,7 @@ func walkDir() {
 // if it's a path we're interested in (added, modified, ...)
 // returns nil otherwise
 func extractPath(line string) string {
-	pieces := strings.Split(line, " ")
+	pieces := strings.Split(strings.TrimSpace(line), " ")
 	if len(pieces) < 2 {
 		return ""
 	}
@@ -254,6 +258,8 @@ func walkChanged() {
 		transformFile(path, info, err)
 	}
 }
+
+var verbose = flag.Bool("verbose", false, "run in verbose mode")
 
 func main() {
 	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory")
