@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -105,10 +106,23 @@ func extractPath(line string) string {
 	return ""
 }
 
+// isGitRoot returns true if the cwd is the root of a git repo.
+func isGitRoot() bool {
+	info, err := os.Stat(".git")
+	if err == nil && info.IsDir() {
+		return true
+	}
+
+	return false
+}
+
 // changedFiles returns a slice of file names that have been modified/added
 // to the git repository
 func changedFiles() ([]string, error) {
-	//TODO: make sure this is run only in the top-level dir of the repo
+	if !isGitRoot() {
+		return nil, errors.New("cwd is not the root of a git repository")
+	}
+
 	status := exec.Command("git", "status", "--porcelain")
 	output, err := status.Output()
 	if err != nil {
@@ -145,10 +159,13 @@ func walkChanged() {
 }
 
 func main() {
-	var dir = flag.Bool("dir", true, "operate recursively on all source files in the current directory")
+	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory")
 	var changed = flag.Bool("changed", false, "operate only on files that have been changed")
 
 	flag.Parse()
+	if !*dir && !*changed {
+		flag.Usage()
+	}
 
 	if *changed {
 		walkChanged()
