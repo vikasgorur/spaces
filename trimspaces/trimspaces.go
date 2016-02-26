@@ -85,6 +85,26 @@ func walkDir() {
 	filepath.Walk(cwd, transformFile)
 }
 
+// extractPath returns a path contained in a line of 'git status' output
+// if it's a path we're interested in (added, modified, ...)
+// returns nil otherwise
+func extractPath(line string) string {
+	pieces := strings.Split(line, " ")
+	if len(pieces) < 2 {
+		return ""
+	}
+
+	code := pieces[0]
+	if code == "M" || code == "A" || code == "??" {
+		//TODO: handle renames
+		//TODO: this won't work if the filename contains a space
+
+		return pieces[1]
+	}
+
+	return ""
+}
+
 // changedFiles returns a slice of file names that have been modified/added
 // to the git repository
 func changedFiles() ([]string, error) {
@@ -98,17 +118,9 @@ func changedFiles() ([]string, error) {
 	var paths []string
 	lines := bufio.NewScanner(bytes.NewReader(output))
 	for lines.Scan() {
-		pieces := strings.Split(lines.Text(), " ")
-		if len(pieces) < 2 {
-			continue
-		}
-
-		code := pieces[0]
-		if code == "M" || code == "A" || code == "??" {
-			//TODO: handle renames
-			//TODO: this won't work if the filename contains a space
-
-			paths = append(paths, pieces[1])
+		path := extractPath(lines.Text())
+		if path != "" {
+			paths = append(paths, path)
 		}
 	}
 
