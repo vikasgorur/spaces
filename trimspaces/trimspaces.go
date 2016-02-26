@@ -2,11 +2,13 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -42,6 +44,7 @@ func isSourceFile(path string, info os.FileInfo) bool {
 
 // transformFile reads a single file, fixes trailing spaces, and writes it back.
 func transformFile(path string, info os.FileInfo, err error) error {
+	//TODO handle err properly
 	if isSourceFile(path, info) {
 		f, err := os.Open(path)
 		if err != nil {
@@ -71,6 +74,7 @@ func transformFile(path string, info os.FileInfo, err error) error {
 	return nil
 }
 
+// walkDir walks every file under the cwd
 func walkDir() {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -81,11 +85,62 @@ func walkDir() {
 	filepath.Walk(cwd, transformFile)
 }
 
+// changedFiles returns a slice of file names that have been modified/added
+// to the git repository
+func changedFiles() ([]string, error) {
+	//TODO: make sure this is run only in the top-level dir of the repo
+	status := exec.Command("git", "status", "--porcelain")
+	output, err := status.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var paths []string
+	lines := bufio.NewScanner(bytes.NewReader(output))
+	for lines.Scan() {
+		pieces := strings.Split(lines.Text(), " ")
+		if len(pieces) < 2 {
+			continue
+		}
+
+		code := pieces[0]
+		if code == "M" || code == "A" || code == "??" {
+			//TODO: handle renames
+			//TODO: this won't work if the filename contains a space
+
+			paths = append(paths, pieces[1])
+		}
+	}
+
+	return paths, nil
+}
+
+// walkChanges walks only changed/added files in the git repository
+func walkChanged() {
+	paths, err := changedFiles()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, path := range paths {
+		info, err := os.Stat(path)
+		if err != nil {
+			fmt.Println(err)
+		}
+		transformFile(path, info, err)
+	}
+}
+
 func main() {
 	var dir = flag.Bool("dir", true, "operate recursively on all source files in the current directory")
-	//var changes = flag.Bool("changes", false, "operate only on files that have been changed")
+	var changed = flag.Bool("changed", false, "operate only on files that have been changed")
 
-	if *dir {
+	flag.Parse()
+
+	if *changed {
+		walkChanged()
+	} else if *dir {
 		walkDir()
 	}
 }
