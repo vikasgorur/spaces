@@ -28,9 +28,102 @@ func trimSpaces(in io.Reader, out io.Writer) {
 	}
 }
 
+// list stolen from https://github.com/ggreer/the_silver_searcher/blob/master/src/lang.c
 var srcExtensions set.Interface = set.New(
-	"html",
-	"go",
+	"as", "mxml", // actionscript
+	"ada", "adb", "ads", // ada
+	"asm", "s", // asm
+	"bat", "cmd", // batch
+	"bb", "bbappend", "bbclass", "inc", // bitbake
+	"bro", "bif", // bro
+	"c", "h", "xs", // cc
+	"cfc", "cfm", "cfml", // cfmx
+	"clj", "cljs", "cljc", "cljx", // clojure
+	"coffee", "cjsx", // coffee
+	"cpp", "cc", "C", "cxx", "m", "hpp", "hh", "h", "H", "hxx", // cpp
+	"cr", "ecr", // crystal
+	"cs",                                                                                  // csharp
+	"css",                                                                                 // css
+	"pas", "int", "dfm", "nfm", "dof", "dpk", "dproj", "groupproj", "bdsgroup", "bdsproj", // delphi
+	"ebuild", "eclass", // ebuild
+	"el",        // elisp
+	"ex", "exs", // elixir
+	"erl", "hrl", // erlang
+	"f", "f77", "f90", "f95", "f03", "for", "ftn", "fpp", // fortran
+	"fs", "fsi", "fsx", // fsharp
+	"po", "pot", "mo", // gettext
+	"go",                               // go
+	"groovy", "gtmpl", "gpp", "grunit", // groovy
+	"haml",      // haml
+	"hs", "lhs", // haskell
+	"h",                             // hh
+	"htm", "html", "shtml", "xhtml", // html
+	"ini",                // ini
+	"jade",               // jade
+	"java", "properties", // java
+	"js", "jsx", // js
+	"json",                         // json
+	"jsp", "jspx", "jhtm", "jhtml", // jsp
+	"jl",          // julia
+	"less",        // less
+	"liquid",      // liquid
+	"lisp", "lsp", // lisp
+	"lua",                    // lua
+	"m4",                     // m4
+	"Makefiles", "mk", "mak", // make
+	"mako",                                           // mako
+	"markdown", "mdown", "mdwn", "mkdn", "mkd", "md", // markdown
+	"mas", "mhtml", "mpl", "mtxt", // mason
+	"m",       // matlab
+	"m", "wl", // mathematica
+	"m", "moo", // mercury
+	"nim",    // nim
+	"m", "h", // objc
+	"mm", "h", // objcpp
+	"ml", "mli", "mll", "mly", // ocaml
+	"m",                                            // octave
+	"pir", "pasm", "pmc", "ops", "pod", "pg", "tg", // parrot
+	"pl", "pm", "pm6", "pod", "t", // perl
+	"php", "phpt", "php3", "php4", "php5", "phtml", // php
+	"pike", "pmod", // pike
+	"pt", "cpt", "metadata", "cpy", "py", "xml", "zcml", // plone
+	"pp",               // puppet
+	"py",               // python
+	"qml",              // qml
+	"rkt", "ss", "scm", // racket
+	"Rakefiles",                       // rake
+	"rst",                             // restructuredtext
+	"rs",                              // rs
+	"R", "Rmd", "Rnw", "Rtex", "Rrst", // r
+	"rdoc",                                              // rdoc
+	"rb", "rhtml", "rjs", "rxml", "erb", "rake", "spec", // ruby
+	"rs",           // rust
+	"sls",          // salt
+	"sass", "scss", // sass
+	"scala",     // scala
+	"scm", "ss", // scheme
+	"sh", "bash", "csh", "tcsh", "ksh", "zsh", // shell
+	"st",                       // smalltalk
+	"sml", "fun", "mlb", "sig", // sml
+	"sql", "ctl", // sql
+	"styl",               // stylus
+	"swift",              // swift
+	"tcl", "itcl", "itk", // tcl
+	"tex", "cls", "sty", // tex
+	"tt", "tt2", "ttml", // tt
+	"toml",      // toml
+	"ts", "tsx", // ts
+	"vala", "vapi", // vala
+	"bas", "cls", "frm", "ctl", "vb", "resx", // vb
+	"vm", "vtl", "vsl", // velocity
+	"v", "vh", "sv", // verilog
+	"vhd", "vhdl", // vhdl
+	"vim",        // vim
+	"wxi", "wxs", // wix
+	"wsdl",                             // wsdl
+	"wadl",                             // wadl
+	"xml", "dtd", "xsl", "xslt", "ent", // xml
+	"yaml", "yml", // yaml
 )
 
 // isSourceFile returns true if the path is a source file
