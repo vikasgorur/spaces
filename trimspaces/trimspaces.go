@@ -45,7 +45,11 @@ func isSourceFile(path string, info os.FileInfo) bool {
 
 // transformFile reads a single file, fixes trailing spaces, and writes it back.
 func transformFile(path string, info os.FileInfo, err error) error {
-	//TODO handle err properly
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning: could not fix %v", path)
+		return nil
+	}
+
 	if isSourceFile(path, info) {
 		f, err := os.Open(path)
 		if err != nil {
