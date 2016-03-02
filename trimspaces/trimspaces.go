@@ -132,6 +132,7 @@ var ignoreChecker *gitignore.Checker
 func isIgnored(path string, info os.FileInfo) bool {
 	if ignoreChecker == nil {
 		ignoreChecker = gitignore.NewChecker()
+		ignoreChecker.LoadBasePath(".")
 	}
 
 	return ignoreChecker.Check(path, info)
@@ -148,12 +149,18 @@ func isSourceFile(path string, info os.FileInfo) bool {
 }
 
 // transformFile reads a single file, fixes trailing spaces, and writes it back.
+// satisfies filepath.WalkFunc
 func transformFile(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "warning: could not fix %v", path)
 		return nil
 	}
 
+	if info.IsDir() && isIgnored(path, info) {
+		return filepath.SkipDir
+	}
+
+	//fmt.Printf("walking %v\n", path)
 	if isSourceFile(path, info) && !isIgnored(path, info) {
 		f, err := os.Open(path)
 		if err != nil {
