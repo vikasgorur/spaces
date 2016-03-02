@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/svent/sift/gitignore"
 	"gopkg.in/fatih/set.v0"
 )
 
@@ -126,6 +127,16 @@ var srcExtensions set.Interface = set.New(
 	"yaml", "yml", // yaml
 )
 
+var ignoreChecker *gitignore.Checker
+
+func isIgnored(path string, info os.FileInfo) bool {
+	if ignoreChecker == nil {
+		ignoreChecker = gitignore.NewChecker()
+	}
+
+	return ignoreChecker.Check(path, info)
+}
+
 // isSourceFile returns true if the path is a source file
 func isSourceFile(path string, info os.FileInfo) bool {
 	ext := filepath.Ext(path)
@@ -143,7 +154,7 @@ func transformFile(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 
-	if isSourceFile(path, info) {
+	if isSourceFile(path, info) && !isIgnored(path, info) {
 		f, err := os.Open(path)
 		if err != nil {
 			return err
