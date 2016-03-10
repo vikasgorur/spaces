@@ -160,6 +160,8 @@ func extractPath(line string) string {
 	} else if []rune(code)[0] == 'R' {
 		return strings.TrimSpace(strings.SplitN(pieces[1], "->", 2)[1])
 	}
+	//TODO: this will still fail if the filenames contain leading or trailing spaces
+	// use 'git status -z' to handle it properly
 
 	return ""
 }
