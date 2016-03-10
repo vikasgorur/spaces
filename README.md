@@ -92,6 +92,6 @@ or I need to fix files that someone else edited.
 
 ## Contributing
 
-Pull requests are welcome!
+Please open an issue if you find a bug or contact me via email or twitter. Pull requests are welcome!
 
 If you find the tool useful, tweet at me [@vikasgorur](https://twitter.com/vikasgorur).
