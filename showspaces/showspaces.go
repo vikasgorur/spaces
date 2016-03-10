@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	"github.com/fatih/color"
+	"github.com/vikasgorur/spaces"
 )
 
 var redHighlight = color.New(color.BgRed).SprintfFunc()
@@ -41,12 +42,29 @@ func hasSpaces(f *os.File) {
 	}
 }
 
+var process func(*os.File)
+
+func walk(path string, info os.FileInfo, err error) error {
+	if spaces.IsSourceFile(path, info) && !spaces.IsIgnored(path, info) {
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+			//todo: is this the right thing?
+		}
+		defer f.Close()
+
+		process(f)
+	}
+	return nil
+}
+
 func main() {
-	var check = flag.Bool("c", false, "check mode; exit 0 if there are no trailing spaces, nonzero otherwise")
+	var check = flag.Bool("check", false, "check mode; exit 0 if there are no trailing spaces, nonzero otherwise")
+	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory")
+	var changed = flag.Bool("changed", false, "operate only on files that have been changed")
 
 	flag.Parse()
 
-	var process func(*os.File)
 	if *check {
 		process = hasSpaces
 	} else {
@@ -54,9 +72,11 @@ func main() {
 	}
 
 	files := flag.Args()
-	if len(files) == 0 {
-		process(os.Stdin)
-	} else {
+	if *dir {
+		spaces.WalkDir(walk)
+	} else if *changed {
+		spaces.WalkChanged(walk)
+	} else if len(files) != 0 {
 		for _, arg := range files {
 			f, err := os.Open(arg)
 			if err != nil {
@@ -67,6 +87,9 @@ func main() {
 			process(f)
 			f.Close()
 		}
+
+	} else {
+		process(os.Stdin)
 	}
 
 	os.Exit(0)
