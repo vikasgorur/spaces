@@ -78,7 +78,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr,
-			`Usage: %s [-check] [-dir|-changed] [file1 ...]
+			`Usage: %s [-dir|-changed] [file1 ...]
 
 Fix trailing spaces in input files (or stdin).
 
