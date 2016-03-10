@@ -59,9 +59,19 @@ func walk(path string, info os.FileInfo, err error) error {
 }
 
 func main() {
-	var check = flag.Bool("check", false, "check mode; exit 0 if there are no trailing spaces, nonzero otherwise")
-	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory")
-	var changed = flag.Bool("changed", false, "operate only on files that have been changed")
+	var check = flag.Bool("check", false, "check mode; exit 0 if there are no trailing spaces, nonzero otherwise.")
+	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory.")
+	var changed = flag.Bool("changed", false, "operate only on files that have been changed (only works in git repos).")
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr,
+			`Usage: %s [-check] [-dir|-changed] [file1 ...]
+
+Highlight trailing spaces in input files (or stdin).
+
+`, os.Args[0])
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
 
