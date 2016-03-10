@@ -70,14 +70,25 @@ To check a given list of files:
 $ showspaces -check src/*.js
 ```
 
+## FAQ
 
-## Why bother?
+### Why bother?
 
 Trailing whitespaces are an annoyance. They can make pull requests and code reviews confusing
 because a whitespace change causes a line to be a part of the diff even though nothing else
 has changed. Most developers and open source projects prefer that they are removed.
 
 For more, read [Why Are Trailing Whitespaces Bad?](http://www.dinduks.com/why-are-trailing-whitespaces-bad/)
+
+### Why not a shell one-liner?
+
+I could do this with a one-liner, but I'd rather have a tool that understands git and will work for
+repositories of any language.
+
+### Why not let the editor do this on save?
+
+Configuring your editor to do this is a good practice. Sometimes, though, I'll use a different editor for a quick fix (vim)
+or I need to fix files that someone else edited.
 
 ## Contributing
 
