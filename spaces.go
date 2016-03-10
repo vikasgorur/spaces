@@ -216,3 +216,16 @@ func WalkChanged(fn filepath.WalkFunc) {
 		fn(path, info, err)
 	}
 }
+
+// WalkList walks a given list (slice) of files
+func WalkList(files []string, fn filepath.WalkFunc) {
+	for _, arg := range files {
+		info, err := os.Stat(arg)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fn(arg, info, err)
+	}
+}

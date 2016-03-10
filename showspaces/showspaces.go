@@ -87,17 +87,7 @@ Highlight trailing spaces in input files (or stdin).
 	} else if *changed {
 		spaces.WalkChanged(walk)
 	} else if len(files) != 0 {
-		for _, arg := range files {
-			f, err := os.Open(arg)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "showspaces: %v\n", err)
-				continue
-			}
-
-			process(f)
-			f.Close()
-		}
-
+		spaces.WalkList(files, walk)
 	} else {
 		process(os.Stdin)
 	}

@@ -73,17 +73,31 @@ func transformFile(path string, info os.FileInfo, err error) error {
 var verbose = flag.Bool("verbose", false, "run in verbose mode")
 
 func main() {
-	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory")
-	var changed = flag.Bool("changed", false, "operate only on files that have been changed")
+	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory.")
+	var changed = flag.Bool("changed", false, "operate only on files that have been changed (only works in git repos).")
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr,
+			`Usage: %s [-check] [-dir|-changed] [file1 ...]
+
+Fix trailing spaces in input files (or stdin).
+
+`, os.Args[0])
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
-	if !*dir && !*changed {
-		flag.Usage()
+
+	files := flag.Args()
+	if *dir {
+		spaces.WalkDir(transformFile)
+	} else if *changed {
+		spaces.WalkChanged(transformFile)
+	} else if len(files) != 0 {
+		spaces.WalkList(files, transformFile)
+	} else {
+		trimSpaces(os.Stdin, os.Stdout)
 	}
 
-	if *changed {
-		spaces.WalkChanged(transformFile)
-	} else if *dir {
-		spaces.WalkDir(transformFile)
-	}
+	os.Exit(0)
 }
