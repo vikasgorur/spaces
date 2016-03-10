@@ -4,7 +4,7 @@
 Assuming you have the standard go tools installed and `$GOPATH/bin` is in your `PATH`:
 
 ```bash
-$ go get github.com/vikasgorur/spaces/trimspaces github.com/vikasgorur/spaces/trimspaces
+$ go get github.com/vikasgorur/spaces/showspaces github.com/vikasgorur/spaces/trimspaces
 ```
 
 ## trimspaces
