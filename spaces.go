@@ -114,7 +114,7 @@ var srcExtensions set.Interface = set.New(
 
 var ignoreChecker *gitignore.Checker
 
-// IsIgnored returns true if the path matches .gitignore
+// IsIgnored returns true if the path matches .gitignore.
 func IsIgnored(path string, info os.FileInfo) bool {
 	if ignoreChecker == nil {
 		ignoreChecker = gitignore.NewChecker()
@@ -124,7 +124,7 @@ func IsIgnored(path string, info os.FileInfo) bool {
 	return ignoreChecker.Check(path, info)
 }
 
-// IsSourceFile returns true if the path is a source file
+// IsSourceFile returns true if the path is a source file.
 func IsSourceFile(path string, info os.FileInfo) bool {
 	ext := filepath.Ext(path)
 	if info.Mode().IsRegular() && strings.HasPrefix(ext, ".") && srcExtensions.Has(filepath.Ext(path)[1:]) {
@@ -134,15 +134,29 @@ func IsSourceFile(path string, info os.FileInfo) bool {
 	return false
 }
 
-// WalkDir walks every file under the cwd
-func WalkDir(fn filepath.WalkFunc) {
+// WalkFunc is a function that is called on every input file.
+// boolean return value indicates whether the file was affected.
+type WalkFunc func(path string, info os.FileInfo, err error) (bool, error)
+
+// WalkDir walks every file under the cwd.
+// returns a list of affected files.
+func WalkDir(fn WalkFunc) []string {
 	cwd, err := os.Getwd()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "trimspaces: could not get current directory: %v\n", err)
 		os.Exit(2)
 	}
 
-	filepath.Walk(cwd, fn)
+	var affectedFiles []string
+	walker := func(path string, info os.FileInfo, err error) error {
+		affected, e := fn(path, info, err)
+		if affected {
+			affectedFiles = append(affectedFiles, path)
+		}
+		return e
+	}
+	filepath.Walk(cwd, walker)
+	return affectedFiles
 }
 
 // extractPath returns a path contained in a line of 'git status' output
@@ -156,7 +170,7 @@ func extractPath(line string) string {
 
 	code := pieces[0]
 	if code == "M" || code == "A" || code == "??" {
-		return pieces[1]
+		return strings.TrimSpace(pieces[1])
 	} else if []rune(code)[0] == 'R' {
 		return strings.TrimSpace(strings.SplitN(pieces[1], "->", 2)[1])
 	}
@@ -177,7 +191,7 @@ func IsGitRoot() bool {
 }
 
 // changedFiles returns a slice of file names that have been modified/added
-// to the git repository
+// to the git repository.
 func changedFiles() ([]string, error) {
 	if !IsGitRoot() {
 		return nil, errors.New("cwd is not the root of a git repository")
@@ -201,32 +215,48 @@ func changedFiles() ([]string, error) {
 	return paths, nil
 }
 
-// WalkChanged walks only changed/added files in the git repository
-func WalkChanged(fn filepath.WalkFunc) {
+// WalkChanged walks only changed/added files in the git repository.
+// returns a list of affected files.
+func WalkChanged(fn WalkFunc) []string {
+	var affectedFiles []string
 	paths, err := changedFiles()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return affectedFiles
 	}
 
 	for _, path := range paths {
 		info, err := os.Stat(path)
 		if err != nil {
 			fmt.Println(err)
+			return affectedFiles
 		}
-		fn(path, info, err)
+		affected, _ := fn(path, info, err)
+		if affected {
+			affectedFiles = append(affectedFiles, path)
+		}
 	}
+
+	return affectedFiles
 }
 
-// WalkList walks a given list (slice) of files
-func WalkList(files []string, fn filepath.WalkFunc) {
-	for _, arg := range files {
-		info, err := os.Stat(arg)
+// WalkList walks a given list (slice) of files.
+// returns a list of affected files.
+func WalkList(files []string, fn WalkFunc) []string {
+	var affectedFiles []string
+
+	for _, path := range files {
+		info, err := os.Stat(path)
 		if err != nil {
 			fmt.Println(err)
-			return
+			return affectedFiles
 		}
 
-		fn(arg, info, err)
+		affected, _ := fn(path, info, err)
+		if affected {
+			affectedFiles = append(affectedFiles, path)
+		}
 	}
+
+	return affectedFiles
 }

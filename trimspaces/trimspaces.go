@@ -27,50 +27,48 @@ func trimSpaces(in io.Reader, out io.Writer) {
 
 // transformFile reads a single file, fixes trailing spaces, and writes it back.
 // satisfies filepath.WalkFunc
-func transformFile(path string, info os.FileInfo, err error) error {
+func transformFile(path string, info os.FileInfo, err error) (bool, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "warning: could not fix %v", path)
-		return nil
+		return false, nil
 	}
 
 	if info.IsDir() && spaces.IsIgnored(path, info) {
-		return filepath.SkipDir
+		return false, filepath.SkipDir
 	}
 
 	if spaces.IsSourceFile(path, info) && !spaces.IsIgnored(path, info) {
 		f, err := os.Open(path)
 		if err != nil {
-			return err
+			return false, err
 		}
 
 		out, err := ioutil.TempFile(".", "ts")
 		if err != nil {
-			return err
+			return false, err
 		}
 
 		outPath := out.Name()
 		trimSpaces(f, out)
 
 		if err := f.Close(); err != nil {
-			return err
+			return false, err
 		}
 		if err := out.Close(); err != nil {
-			return err
+			return false, err
 		}
 
 		if err := os.Rename(outPath, path); err != nil {
 			os.Remove(outPath)
-			return err
+			return false, err
 		}
 
-		if *verbose {
-			fmt.Fprintf(os.Stderr, "✓ %v\n", path)
-		}
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
-var verbose = flag.Bool("verbose", false, "run in verbose mode")
+var listFixed = flag.Bool("list-fixed", false, "list files that were fixed in a format suitable for shell arguments")
 
 func main() {
 	var dir = flag.Bool("dir", false, "operate recursively on all source files in the current directory.")
@@ -78,7 +76,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr,
-			`Usage: %s [-dir|-changed] [file1 ...]
+			`Usage: %s [-list-fixed] [-dir|-changed] [file1 ...]
 
 Fix trailing spaces in input files (or stdin).
 
@@ -89,15 +87,20 @@ Fix trailing spaces in input files (or stdin).
 	flag.Parse()
 
 	files := flag.Args()
+	var affected []string
+
 	if *dir {
-		spaces.WalkDir(transformFile)
+		affected = spaces.WalkDir(transformFile)
 	} else if *changed {
-		spaces.WalkChanged(transformFile)
+		affected = spaces.WalkChanged(transformFile)
 	} else if len(files) != 0 {
-		spaces.WalkList(files, transformFile)
+		affected = spaces.WalkList(files, transformFile)
 	} else {
 		trimSpaces(os.Stdin, os.Stdout)
 	}
 
+	if *listFixed {
+		fmt.Fprintf(os.Stdout, "%v\n", strings.Join(affected, " "))
+	}
 	os.Exit(0)
 }

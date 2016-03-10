@@ -11,6 +11,7 @@ func TestExtractPath(t *testing.T) {
 		{"?? index.html", "index.html"},
 		{"?? name with spaces", "name with spaces"},
 		{"RM README.md -> file name.md", "file name.md"},
+		{"M  README.md", "README.md"},
 	}
 
 	for _, c := range cases {

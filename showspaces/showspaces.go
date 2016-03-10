@@ -44,18 +44,18 @@ func hasSpaces(f *os.File) {
 
 var process func(*os.File)
 
-func walk(path string, info os.FileInfo, err error) error {
+func walk(path string, info os.FileInfo, err error) (bool, error) {
 	if spaces.IsSourceFile(path, info) && !spaces.IsIgnored(path, info) {
 		f, err := os.Open(path)
 		if err != nil {
-			return err
-			//todo: is this the right thing?
+			return false, err
 		}
 		defer f.Close()
 
 		process(f)
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
 func main() {
