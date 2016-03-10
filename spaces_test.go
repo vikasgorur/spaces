@@ -9,13 +9,14 @@ func TestExtractPath(t *testing.T) {
 	}{
 		{" M test.go", "test.go"},
 		{"?? index.html", "index.html"},
-		{"RM index.html -> index.htmls", ""},
 		{"?? name with spaces", "name with spaces"},
+		{"RM README.md -> file name.md", "file name.md"},
 	}
 
 	for _, c := range cases {
+		actual := extractPath(c.input)
 		if c.output != extractPath(c.input) {
-			t.Errorf("extractPath failed, expected: %v, actual: %v\n", c.output, c.input)
+			t.Errorf("extractPath failed, expected: %v, actual: %v\n", c.output, actual)
 		}
 	}
 }

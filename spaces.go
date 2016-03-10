@@ -156,9 +156,9 @@ func extractPath(line string) string {
 
 	code := pieces[0]
 	if code == "M" || code == "A" || code == "??" {
-		//TODO: handle renames
-
 		return pieces[1]
+	} else if []rune(code)[0] == 'R' {
+		return strings.TrimSpace(strings.SplitN(pieces[1], "->", 2)[1])
 	}
 
 	return ""
