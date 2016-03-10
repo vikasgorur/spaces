@@ -50,7 +50,10 @@ modifies source files (files with extensions it recognizes). I use it as part of
 clean up whitespaces before every commit:
 
 ```bash
-alias commit="trimspaces -changed; git commit $*"
+function commit {
+    git add $(trimspaces -list-fixed -changed)
+    git commit $*
+}
 ```
 
 ## showspaces
