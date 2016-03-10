@@ -1,10 +1,25 @@
-# trimspaces
+# spaces
+
+## trimspaces
 A tool to remove trailing whitespaces recursively from source files in a directory.
 
 ## Usage
 
-The tool operates in two modes: all source files in the directory, or just those files that
-have been changed (only works inside git repositories).
+```
+Usage: ./trimspaces [-check] [-dir|-changed] [file1 ...]
+
+Fix trailing spaces in input files (or stdin).
+
+  -changed
+    	operate only on files that have been changed (only works in git repos).
+  -dir
+    	operate recursively on all source files in the current directory.
+  -verbose
+    	run in verbose mode
+```
+
+Input must be provided either by the mode (`dir/changed`) or by a list of files on the command-line,
+or by standard input.
 
 To fix all files under the current directory:
 
@@ -18,6 +33,11 @@ To fix only changed files:
 $ trimspaces -changed
 ```
 
+To fix a given list of files:
+```bash
+$ trimspaces src/*.js
+```
+
 `trimspaces` is designed to be used with git repositories containing source code. It respects `.gitignore` and only
 modifies source files (files with extensions it recognizes). I use it as part of an alias to
 clean up whitespaces before every commit:
@@ -25,6 +45,24 @@ clean up whitespaces before every commit:
 ```bash
 alias commit="trimspaces -changed; git commit $*"
 ```
+
+## showspaces
+
+`showspaces` is a tool to highlight trailing spaces in files. It accepts the same arguments as `trimspaces` with one addition,
+a 'check' mode. In this mode no output is printed but the exit status is non-zero if any of the input files contain trailing
+spaces.
+
+To highlight spaces in all changed files:
+
+```bash
+$ showspaces -changed
+```
+
+To check a given list of files:
+```bash
+$ showspaces -check src/*.js
+```
+
 
 ## Why bother?
 
