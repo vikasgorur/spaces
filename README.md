@@ -1,5 +1,12 @@
 # spaces
 
+## Install
+Assuming you have the standard go tools installed and `$GOPATH/bin` is in your `PATH`:
+
+```bash
+$ go get github.com/vikasgorur/spaces/trimspaces github.com/vikasgorur/spaces/trimspaces
+```
+
 ## trimspaces
 A tool to remove trailing whitespaces recursively from source files in a directory.
 
