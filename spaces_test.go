@@ -1,4 +1,4 @@
-package main
+package spaces
 
 import "testing"
 
@@ -10,6 +10,7 @@ func TestExtractPath(t *testing.T) {
 		{" M test.go", "test.go"},
 		{"?? index.html", "index.html"},
 		{"RM index.html -> index.htmls", ""},
+		{"?? name with spaces", "name with spaces"},
 	}
 
 	for _, c := range cases {

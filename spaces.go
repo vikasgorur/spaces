@@ -149,7 +149,7 @@ func WalkDir(fn filepath.WalkFunc) {
 // if it's a path we're interested in (added, modified, ...)
 // returns nil otherwise
 func extractPath(line string) string {
-	pieces := strings.Split(strings.TrimSpace(line), " ")
+	pieces := strings.SplitN(strings.TrimSpace(line), " ", 2)
 	if len(pieces) < 2 {
 		return ""
 	}
@@ -157,7 +157,6 @@ func extractPath(line string) string {
 	code := pieces[0]
 	if code == "M" || code == "A" || code == "??" {
 		//TODO: handle renames
-		//TODO: this won't work if the filename contains a space
 
 		return pieces[1]
 	}
